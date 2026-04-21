@@ -18,7 +18,7 @@
     {% include "partials/_kpi_card.html" with title="Orders" value=total_orders icon="bi-receipt" color="success" %}
   </div>
   <div class="col-sm-6 col-xl-3">
-    {% include "partials/_kpi_card.html" with title="Revenue" value=total_revenue icon="bi-currency-dollar" color="warning" subtitle="Total order value" %}
+    {% include "partials/_kpi_card.html" with title="Revenue" value=total_revenue|floatformat:2 icon="bi-currency-dollar" color="warning" subtitle="Total order value" %}
   </div>
   <div class="col-sm-6 col-xl-3">
     {% include "partials/_kpi_card.html" with title="Products" value=total_products icon="bi-box" color="info" %}
@@ -114,7 +114,7 @@
 {% block extra_js %}
 <script>
   const monthlyLabels = [{% for m in monthly_sales %}"{{ m.month|date:'M Y' }}"{% if not forloop.last %},{% endif %}{% endfor %}];
-  const monthlyRevenue = [{% for m in monthly_sales %}{{ m.revenue|default:"0" }}{% if not forloop.last %},{% endif %}{% endfor %}];
+  const monthlyRevenue = [{% for m in monthly_sales %}{{ m.revenue|default_if_none:0|floatformat:2 }}{% if not forloop.last %},{% endif %}{% endfor %}];
   createLineChart('monthlySalesChart', monthlyLabels, monthlyRevenue, 'Revenue ($)');
 
   const custLabels = [{% for c in top_customers %}"{{ c.name|default:'Unknown' }}"{% if not forloop.last %},{% endif %}{% endfor %}];
