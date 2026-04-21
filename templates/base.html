@@ -59,6 +59,9 @@
       <a class="nav-link {% if active_nav == 'products' %}active{% endif %}" href="{% url 'catalog:product_list' %}">
         <i class="bi bi-box"></i> Products
       </a>
+      <a class="nav-link {% if active_nav == 'search' %}active{% endif %}" href="{% url 'search:product_search' %}">
+        <i class="bi bi-stars"></i> Semantic Search
+      </a>
 
       <div class="nav-section mt-3">Analytics</div>
       <a class="nav-link {% if active_nav == 'reports' %}active{% endif %}" href="{% url 'reporting:report_index' %}">

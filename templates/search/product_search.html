@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block title %}Semantic Search — Northwind CRM{% endblock %}
+
+{% block content %}
+<nav class="mb-3">
+  <ol class="breadcrumb small mb-0">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+    <li class="breadcrumb-item active">Semantic Search</li>
+  </ol>
+</nav>
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div>
+    <h4 class="fw-bold mb-1">Semantic Product Search</h4>
+    <p class="text-secondary mb-0 small">
+      Natural-language search powered by sentence embeddings + pgvector.
+      Try <em>"something sweet for breakfast"</em> or <em>"cold refreshing drinks"</em>.
+    </p>
+  </div>
+</div>
+
+<form method="get" class="card mb-4">
+  <div class="card-body">
+    <div class="row g-2">
+      <div class="col">
+        <input
+          type="text" name="q" value="{{ q }}"
+          class="form-control form-control-lg"
+          placeholder="Describe what you're looking for…"
+          autofocus
+        >
+      </div>
+      <div class="col-auto">
+        <select name="k" class="form-select form-select-lg">
+          <option value="5"  {% if k == 5  %}selected{% endif %}>Top 5</option>
+          <option value="10" {% if k == 10 %}selected{% endif %}>Top 10</option>
+          <option value="20" {% if k == 20 %}selected{% endif %}>Top 20</option>
+          <option value="30" {% if k == 30 %}selected{% endif %}>Top 30</option>
+        </select>
+      </div>
+      <div class="col-auto">
+        <button class="btn btn-primary btn-lg" type="submit">
+          <i class="bi bi-search me-1"></i> Search
+        </button>
+      </div>
+    </div>
+  </div>
+</form>
+
+{% if q %}
+  <p class="text-secondary small mb-3">
+    {{ results|length }} result{{ results|length|pluralize }} for
+    <strong>"{{ q }}"</strong>, ranked by cosine similarity.
+  </p>
+
+  {% if results %}
+  <div class="table-container">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Product</th>
+            <th>Category</th>
+            <th class="text-end">List Price</th>
+            <th style="width: 30%;">Similarity</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in results %}
+          <tr>
+            <td class="text-secondary">{{ forloop.counter }}</td>
+            <td class="fw-semibold">
+              {% if r.product %}
+                <a href="{% url 'catalog:product_detail' r.product_id %}">
+                  {{ r.product.product_name|default:r.product_name }}
+                </a>
+              {% else %}
+                {{ r.product_name }}
+                <span class="badge bg-secondary ms-1">missing</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if r.category %}
+                <span class="badge bg-primary bg-opacity-10 text-primary">{{ r.category }}</span>
+              {% else %}—{% endif %}
+            </td>
+            <td class="text-end">
+              {% if r.product and r.product.list_price is not None %}
+                ${{ r.product.list_price|floatformat:2 }}
+              {% else %}—{% endif %}
+            </td>
+            <td>
+              <div class="progress" style="height: 8px;">
+                <div class="progress-bar bg-success"
+                     role="progressbar"
+                     style="width: {% widthratio r.similarity 1 100 %}%;">
+                </div>
+              </div>
+              <small class="text-secondary">
+                sim {{ r.similarity|floatformat:3 }} · dist {{ r.distance|floatformat:3 }}
+              </small>
+            </td>
+            <td class="text-end">
+              {% if r.product %}
+              <a href="{% url 'catalog:product_detail' r.product_id %}"
+                 class="btn btn-sm btn-outline-primary">
+                <i class="bi bi-eye"></i>
+              </a>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% else %}
+    <div class="card">
+      <div class="card-body text-center text-muted py-5">
+        <i class="bi bi-search fs-1 d-block mb-2"></i>
+        No semantic matches. Try a broader phrase, or run
+        <code>python manage.py embed_products</code> to build the index.
+      </div>
+    </div>
+  {% endif %}
+{% else %}
+  <div class="card">
+    <div class="card-body">
+      <h6 class="fw-bold">How it works</h6>
+      <ol class="small text-secondary mb-0">
+        <li>Each product's name, category and description is encoded into a
+            384-dimensional vector with the <code>all-MiniLM-L6-v2</code> model.</li>
+        <li>Vectors are stored in Postgres using the <code>pgvector</code>
+            extension, indexed with HNSW for fast cosine-distance search.</li>
+        <li>Your query is embedded the same way; results are ranked by
+            <code>embedding &lt;=&gt; query_vector</code>.</li>
+      </ol>
+    </div>
+  </div>
+{% endif %}
+{% endblock %}

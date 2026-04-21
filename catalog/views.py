@@ -5,6 +5,7 @@ from django.db.models import Q, Sum, F
 from .models import Products
 from .forms import ProductSearchForm
 from sales.models import OrderDetails
+from search.services import hydrate_products, similar_products
 
 
 def product_list(request):
@@ -56,9 +57,15 @@ def product_detail(request, pk):
         .order_by('-order__order_date')[:10]
     )
 
+    try:
+        similar = hydrate_products(similar_products(product.pk, k=5))
+    except Exception:
+        similar = []
+
     return render(request, 'catalog/product_detail.html', {
         'active_nav': 'products',
         'product': product,
         'sales_stats': sales_stats,
         'recent_orders': recent_orders,
+        'similar': similar,
     })

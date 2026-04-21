@@ -66,6 +66,38 @@
   </div>
 
   <div class="col-lg-8">
+    {% if similar %}
+    <div class="card mb-3">
+      <div class="card-header">
+        <i class="bi bi-stars me-2"></i>Similar Products
+        <span class="badge bg-primary bg-opacity-10 text-primary ms-1">semantic</span>
+      </div>
+      <div class="card-body p-0">
+        <div class="list-group list-group-flush">
+          {% for s in similar %}
+          <a href="{% url 'catalog:product_detail' s.product_id %}"
+             class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+            <div>
+              <div class="fw-semibold">
+                {{ s.product.product_name|default:s.product_name }}
+              </div>
+              <small class="text-secondary">
+                {{ s.category|default:"—" }}
+                {% if s.product and s.product.list_price is not None %}
+                  · ${{ s.product.list_price|floatformat:2 }}
+                {% endif %}
+              </small>
+            </div>
+            <span class="badge bg-success bg-opacity-10 text-success">
+              sim {{ s.similarity|floatformat:3 }}
+            </span>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
     <div class="card">
       <div class="card-header"><i class="bi bi-receipt me-2"></i>Recent Orders</div>
       <div class="card-body p-0">

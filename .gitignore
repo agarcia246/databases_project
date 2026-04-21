@@ -1,6 +1,8 @@
 .env
+.env.postgres
 .venv/
 __pycache__/
 *.pyc
 staticfiles/
 db.sqlite3
+.cache/

@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.postgres',
 
     'catalog',
     'core',
@@ -46,6 +47,7 @@ INSTALLED_APPS = [
     'purchasing',
     'reporting',
     'sales',
+    'search',
 ]
 
 MIDDLEWARE = [
@@ -89,10 +91,18 @@ DATABASES = {
         'PASSWORD': os.getenv('DB_PASSWORD'),
         'HOST': os.getenv('DB_HOST', 'localhost'),
         'PORT': os.getenv('DB_PORT', '3306'),
+    },
+    'vectors': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('VDB_NAME', 'northwind_vectors'),
+        'USER': os.getenv('VDB_USER', 'northwind'),
+        'PASSWORD': os.getenv('VDB_PASSWORD', 'northwind'),
+        'HOST': os.getenv('VDB_HOST', '127.0.0.1'),
+        'PORT': os.getenv('VDB_PORT', '5432'),
     }
 }
 
-
+DATABASE_ROUTERS = ['config.routers.VectorRouter']
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
 

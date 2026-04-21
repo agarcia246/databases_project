@@ -51,8 +51,8 @@ def top_products(request):
     products = list(
         OrderDetails.objects
         .values(
+            'product_id',
             product_name=F('product__product_name'),
-            product_id=F('product__id'),
         )
         .annotate(
             total_qty=Sum('quantity'),
