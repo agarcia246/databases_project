@@ -2,6 +2,8 @@ from django import forms
 
 
 class OrderSearchForm(forms.Form):
+    """Back-office order list search bar."""
+
     q = forms.CharField(
         required=False,
         widget=forms.TextInput(attrs={

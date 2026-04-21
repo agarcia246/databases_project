@@ -1,0 +1,21 @@
+{% extends "shop/base.html" %}
+{% block title %}Order #{{ order.pk }} — Northwind Store{% endblock %}
+
+{% block content %}
+<nav class="mb-3">
+  <ol class="breadcrumb small mb-0">
+    <li class="breadcrumb-item"><a href="{% url 'shop:home' %}" class="shop-link">Home</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'shop:order_list' %}" class="shop-link">My Orders</a></li>
+    <li class="breadcrumb-item active">Order #{{ order.pk }}</li>
+  </ol>
+</nav>
+
+<h4 class="fw-semibold mb-3">
+  Order #{{ order.pk }}
+  {% if order.status %}
+    <span class="shop-status-badge ms-2">{{ order.status.status_name }}</span>
+  {% endif %}
+</h4>
+
+{% include "shop/partials/_order_breakdown.html" %}
+{% endblock %}

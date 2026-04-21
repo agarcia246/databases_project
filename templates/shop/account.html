@@ -1,0 +1,89 @@
+{% extends "shop/base.html" %}
+{% block title %}My Account — Northwind Store{% endblock %}
+
+{% block content %}
+<h4 class="fw-semibold mb-3">Your Account</h4>
+
+<div class="row g-3">
+  <div class="col-lg-4">
+    <div class="shop-card text-center">
+      <i class="bi bi-person-circle" style="font-size: 4rem; color: var(--shop-link);"></i>
+      <h6 class="fw-semibold mt-2">{{ user.get_full_name|default:user.username }}</h6>
+      <div class="text-muted small">{{ user.email }}</div>
+      <hr>
+      <a href="{% url 'shop:order_list' %}" class="btn btn-outline-dark btn-sm w-100 mb-2">
+        <i class="bi bi-receipt me-1"></i> My Orders
+      </a>
+      <form method="post" action="{% url 'shop:logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+          <i class="bi bi-box-arrow-right me-1"></i> Sign out
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="shop-card">
+      <h6 class="fw-semibold mb-3"><i class="bi bi-pencil-square me-2"></i>Customer details</h6>
+      <p class="small text-muted">
+        We use this information to pre-fill the shipping address at checkout.
+      </p>
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label small text-muted mb-1">Company</label>
+            {{ form.company }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small text-muted mb-1">First name</label>
+            {{ form.first_name }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small text-muted mb-1">Last name</label>
+            {{ form.last_name }}
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label small text-muted mb-1">Email</label>
+            {{ form.email_address }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small text-muted mb-1">Business phone</label>
+            {{ form.business_phone }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small text-muted mb-1">Mobile phone</label>
+            {{ form.mobile_phone }}
+          </div>
+
+          <div class="col-12">
+            <label class="form-label small text-muted mb-1">Address</label>
+            {{ form.address }}
+          </div>
+          <div class="col-md-5">
+            <label class="form-label small text-muted mb-1">City</label>
+            {{ form.city }}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small text-muted mb-1">State / Province</label>
+            {{ form.state_province }}
+          </div>
+          <div class="col-md-2">
+            <label class="form-label small text-muted mb-1">ZIP</label>
+            {{ form.zip_postal_code }}
+          </div>
+          <div class="col-md-2">
+            <label class="form-label small text-muted mb-1">Country</label>
+            {{ form.country_region }}
+          </div>
+        </div>
+        <button type="submit" class="btn btn-buy fw-semibold mt-3">
+          <i class="bi bi-check-lg me-1"></i> Save changes
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

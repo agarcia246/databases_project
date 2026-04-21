@@ -1,0 +1,98 @@
+{% extends "shop/base.html" %}
+{% block title %}Checkout — Northwind Store{% endblock %}
+
+{% block content %}
+<h4 class="fw-semibold mb-3">Checkout</h4>
+<p class="text-muted small mb-4">
+  Signed in as <strong>{{ user.email|default:user.username }}</strong>
+  &middot; <a href="{% url 'shop:account' %}" class="shop-link">Update account</a>
+</p>
+
+<form method="post" novalidate>
+  {% csrf_token %}
+  <div class="row g-3">
+    <div class="col-lg-8">
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+      {% endif %}
+
+      <div class="shop-card mb-3">
+        <h6 class="fw-semibold mb-3"><i class="bi bi-truck me-2"></i>Shipping address</h6>
+        <div class="row g-3">
+          <div class="col-md-12">
+            <label class="form-label small text-muted mb-1">Recipient name</label>
+            {{ form.ship_name }}
+            {% if form.ship_name.errors %}<div class="invalid-feedback d-block">{{ form.ship_name.errors|join:" " }}</div>{% endif %}
+          </div>
+          <div class="col-12">
+            <label class="form-label small text-muted mb-1">Address</label>
+            {{ form.ship_address }}
+            {% if form.ship_address.errors %}<div class="invalid-feedback d-block">{{ form.ship_address.errors|join:" " }}</div>{% endif %}
+          </div>
+          <div class="col-md-5">
+            <label class="form-label small text-muted mb-1">City</label>
+            {{ form.ship_city }}
+            {% if form.ship_city.errors %}<div class="invalid-feedback d-block">{{ form.ship_city.errors|join:" " }}</div>{% endif %}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small text-muted mb-1">{{ form.ship_state_province.label }}</label>
+            {{ form.ship_state_province }}
+          </div>
+          <div class="col-md-2">
+            <label class="form-label small text-muted mb-1">{{ form.ship_zip_postal_code.label }}</label>
+            {{ form.ship_zip_postal_code }}
+          </div>
+          <div class="col-md-2">
+            <label class="form-label small text-muted mb-1">{{ form.ship_country_region.label }}</label>
+            {{ form.ship_country_region }}
+          </div>
+        </div>
+      </div>
+
+      <div class="shop-card mb-3">
+        <h6 class="fw-semibold mb-3"><i class="bi bi-credit-card me-2"></i>Payment</h6>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label small text-muted mb-1">Payment method</label>
+            {{ form.payment_type }}
+            {% if form.payment_type.errors %}<div class="invalid-feedback d-block">{{ form.payment_type.errors|join:" " }}</div>{% endif %}
+          </div>
+          <div class="col-12">
+            <label class="form-label small text-muted mb-1">Order notes</label>
+            {{ form.notes }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="shop-card sticky-top" style="top: 90px;">
+        <h6 class="fw-semibold mb-3">Your order</h6>
+        <ul class="list-unstyled small mb-3">
+          {% for line in items %}
+          <li class="d-flex justify-content-between mb-2">
+            <span class="me-2">
+              {{ line.product.product_name }}
+              <span class="text-muted">× {{ line.quantity }}</span>
+            </span>
+            <span class="fw-semibold text-nowrap">${{ line.line_total|floatformat:2 }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+        <hr>
+        <div class="d-flex justify-content-between fw-bold fs-5 mb-3">
+          <span>Total</span>
+          <span>${{ subtotal|floatformat:2 }}</span>
+        </div>
+        <button type="submit" class="btn btn-buy w-100 fw-semibold mb-2"
+                {% if not items %}disabled{% endif %}>
+          <i class="bi bi-check-circle me-1"></i> Place order
+        </button>
+        <a href="{% url 'shop:cart' %}" class="btn btn-link btn-sm w-100 text-muted">
+          <i class="bi bi-arrow-left me-1"></i> Back to cart
+        </a>
+      </div>
+    </div>
+  </div>
+</form>
+{% endblock %}

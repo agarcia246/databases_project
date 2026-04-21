@@ -1,0 +1,83 @@
+{% extends "shop/base.html" %}
+{% block title %}{{ product.product_name }} — Northwind Store{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+  <ol class="breadcrumb small mb-0">
+    <li class="breadcrumb-item"><a href="{% url 'shop:home' %}" class="shop-link">Home</a></li>
+    {% if product.category %}
+    <li class="breadcrumb-item">
+      <a href="{% url 'shop:home' %}?category={{ product.category }}" class="shop-link">{{ product.category }}</a>
+    </li>
+    {% endif %}
+    <li class="breadcrumb-item active">{{ product.product_name }}</li>
+  </ol>
+</nav>
+
+<div class="row g-4">
+  <div class="col-lg-5">
+    <div class="shop-card text-center" style="min-height: 320px;">
+      <i class="bi bi-bag-fill text-secondary" style="font-size: 8rem; opacity: .35;"></i>
+      <div class="text-muted small mt-2">{{ product.quantity_per_unit|default:"" }}</div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <h3 class="fw-semibold mb-2">{{ product.product_name }}</h3>
+    {% if product.category %}
+    <a class="shop-link small"
+       href="{% url 'shop:home' %}?category={{ product.category }}">
+      {{ product.category }}
+    </a>
+    {% endif %}
+    <hr>
+
+    {% if product.description %}
+    <p class="mb-3">{{ product.description }}</p>
+    {% endif %}
+
+    <ul class="list-unstyled small text-muted">
+      {% if product.product_code %}<li><strong>Code:</strong> <code>{{ product.product_code }}</code></li>{% endif %}
+      {% if product.quantity_per_unit %}<li><strong>Pack:</strong> {{ product.quantity_per_unit }}</li>{% endif %}
+    </ul>
+  </div>
+
+  <div class="col-lg-3">
+    <div class="shop-card">
+      <div class="price fs-3 fw-bold mb-1">${{ product.list_price|floatformat:2 }}</div>
+      <div class="small text-muted mb-3">Free in-store pickup available</div>
+
+      <form method="post" action="{% url 'shop:cart_add' product.pk %}">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{% url 'shop:cart' %}">
+        <label class="form-label small mb-1">Quantity</label>
+        <select name="quantity" class="form-select mb-2">
+          {% for i in "123456789" %}
+            <option value="{{ i }}">{{ i }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-buy w-100 mb-2 fw-semibold">
+          <i class="bi bi-cart-plus me-1"></i> Add to cart
+        </button>
+      </form>
+      <a href="{% url 'shop:checkout' %}" class="btn btn-outline-dark w-100">
+        Buy now
+      </a>
+    </div>
+  </div>
+</div>
+
+{% if related %}
+<hr class="my-4">
+<h5 class="fw-semibold mb-3">
+  <i class="bi bi-stars text-warning me-1"></i> Customers also viewed
+</h5>
+<div class="row g-3">
+  {% for r in related %}
+  <div class="col-6 col-md-3">
+    {% include "shop/partials/_product_card.html" with p=r.product similarity=r.similarity %}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

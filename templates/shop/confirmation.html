@@ -1,0 +1,21 @@
+{% extends "shop/base.html" %}
+{% block title %}Order #{{ order.pk }} Confirmed — Northwind Store{% endblock %}
+
+{% block content %}
+<div class="shop-card border-success border-2 text-center py-5 mb-4">
+  <i class="bi bi-check-circle-fill text-success" style="font-size: 3.5rem;"></i>
+  <h3 class="fw-bold mt-3 mb-1">Thank you, {{ user.first_name|default:user.username }}!</h3>
+  <p class="text-muted mb-3">
+    Your order <strong>#{{ order.pk }}</strong> has been placed on
+    {{ order.order_date|date:"F d, Y H:i" }}.
+  </p>
+  <a href="{% url 'shop:order_list' %}" class="btn btn-outline-dark me-2">
+    <i class="bi bi-receipt me-1"></i> View all orders
+  </a>
+  <a href="{% url 'shop:home' %}" class="btn btn-buy fw-semibold">
+    <i class="bi bi-shop me-1"></i> Continue shopping
+  </a>
+</div>
+
+{% include "shop/partials/_order_breakdown.html" %}
+{% endblock %}

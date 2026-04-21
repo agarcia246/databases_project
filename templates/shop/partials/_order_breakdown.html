@@ -1,0 +1,75 @@
+{# Reusable order breakdown used by confirmation + order_detail. #}
+<div class="row g-3 mb-3">
+  <div class="col-md-6">
+    <div class="shop-card h-100">
+      <h6 class="fw-semibold mb-3"><i class="bi bi-truck me-2"></i>Shipping</h6>
+      <div class="small text-muted">
+        <div class="text-dark fw-semibold">{{ order.ship_name|default:"—" }}</div>
+        {{ order.ship_address|default:"—"|linebreaksbr }}<br>
+        {{ order.ship_city|default:"" }}{% if order.ship_state_province %}, {{ order.ship_state_province }}{% endif %}
+        {% if order.ship_zip_postal_code %} {{ order.ship_zip_postal_code }}{% endif %}<br>
+        {{ order.ship_country_region|default:"" }}
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="shop-card h-100">
+      <h6 class="fw-semibold mb-3"><i class="bi bi-info-circle me-2"></i>Order info</h6>
+      <dl class="row small mb-0">
+        <dt class="col-5 text-muted">Status</dt>
+        <dd class="col-7">
+          {% if order.status %}
+            <span class="shop-status-badge">{{ order.status.status_name }}</span>
+          {% else %}—{% endif %}
+        </dd>
+        <dt class="col-5 text-muted">Order date</dt>
+        <dd class="col-7">{{ order.order_date|date:"M d, Y H:i"|default:"—" }}</dd>
+        <dt class="col-5 text-muted">Payment</dt>
+        <dd class="col-7">{{ order.payment_type|default:"—" }}</dd>
+        {% if order.notes %}
+        <dt class="col-5 text-muted">Notes</dt>
+        <dd class="col-7">{{ order.notes }}</dd>
+        {% endif %}
+      </dl>
+    </div>
+  </div>
+</div>
+
+<div class="shop-card p-0 mb-3">
+  <div class="table-responsive">
+    <table class="table align-middle mb-0">
+      <thead>
+        <tr>
+          <th class="ps-3">Product</th>
+          <th class="text-end">Unit price</th>
+          <th class="text-end">Qty</th>
+          <th class="text-end pe-3">Line total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for line in lines %}
+        <tr>
+          <td class="ps-3">
+            {% if line.product %}
+              <a href="{% url 'shop:product_detail' line.product.pk %}" class="shop-link fw-semibold">
+                {{ line.product.product_name }}
+              </a>
+            {% else %}—{% endif %}
+          </td>
+          <td class="text-end">${{ line.unit_price|floatformat:2|default:"0.00" }}</td>
+          <td class="text-end">{{ line.quantity|floatformat:0 }}</td>
+          <td class="text-end pe-3 fw-semibold">${{ line.line_total|floatformat:2 }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" class="text-center text-muted py-4">No line items</td></tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr><td colspan="3" class="text-end text-muted">Subtotal</td><td class="text-end pe-3">${{ subtotal|floatformat:2 }}</td></tr>
+        <tr><td colspan="3" class="text-end text-muted">Shipping</td><td class="text-end pe-3">${{ shipping|floatformat:2 }}</td></tr>
+        <tr><td colspan="3" class="text-end text-muted">Taxes</td><td class="text-end pe-3">${{ taxes|floatformat:2 }}</td></tr>
+        <tr><td colspan="3" class="text-end fw-bold">Total</td><td class="text-end pe-3 fw-bold fs-5">${{ total|floatformat:2 }}</td></tr>
+      </tfoot>
+    </table>
+  </div>
+</div>

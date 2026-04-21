@@ -48,7 +48,13 @@ INSTALLED_APPS = [
     'reporting',
     'sales',
     'search',
+    'shop',
 ]
+
+# ── Storefront auth ────────────────────────────────────────────────────────
+LOGIN_URL = 'shop:login'
+LOGIN_REDIRECT_URL = 'shop:home'
+LOGOUT_REDIRECT_URL = 'shop:home'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
