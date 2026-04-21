@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Suppliers — Northwind CRM{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div>
+    <h4 class="fw-bold mb-1">Suppliers</h4>
+    <p class="text-secondary mb-0 small">{{ total }} supplier{{ total|pluralize }} in the system</p>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <form method="get" class="row g-2 align-items-end">
+    <div class="col-md-8">
+      {{ form.q }}
+    </div>
+    <div class="col-md-4">
+      <button type="submit" class="btn btn-primary">
+        <i class="bi bi-search me-1"></i> Search
+      </button>
+    </div>
+  </form>
+</div>
+
+<div class="table-container">
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Company</th>
+          <th>Contact</th>
+          <th>Job Title</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>City</th>
+          <th>Country</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for sup in page_obj %}
+        <tr>
+          <td>{{ sup.pk }}</td>
+          <td class="fw-semibold">{{ sup.company|default:"—" }}</td>
+          <td>{{ sup.first_name|default:"" }} {{ sup.last_name|default:"" }}</td>
+          <td>{{ sup.job_title|default:"—" }}</td>
+          <td>{{ sup.email_address|default:"—" }}</td>
+          <td>{{ sup.business_phone|default:"—" }}</td>
+          <td>{{ sup.city|default:"—" }}</td>
+          <td>{{ sup.country_region|default:"—" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8" class="text-center text-muted py-4">No suppliers found</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% include "partials/_pagination.html" %}
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Reports — Northwind CRM{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div>
+    <h4 class="fw-bold mb-1">Reports</h4>
+    <p class="text-secondary mb-0 small">Analytics and business intelligence</p>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-3">
+    {% include "partials/_kpi_card.html" with title="Customers" value=total_customers icon="bi-people" color="primary" %}
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    {% include "partials/_kpi_card.html" with title="Orders" value=total_orders icon="bi-receipt" color="success" %}
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    {% include "partials/_kpi_card.html" with title="Revenue" value=total_revenue icon="bi-currency-dollar" color="warning" %}
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    {% include "partials/_kpi_card.html" with title="Products" value=total_products icon="bi-box" color="info" %}
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-body text-center py-4">
+        <i class="bi bi-trophy fs-1 text-warning mb-3 d-block"></i>
+        <h5 class="fw-bold">Top Customers</h5>
+        <p class="text-secondary small">See which customers generate the most revenue</p>
+        <a href="{% url 'reporting:top_customers' %}" class="btn btn-primary">
+          <i class="bi bi-arrow-right me-1"></i> View Report
+        </a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-body text-center py-4">
+        <i class="bi bi-box-seam fs-1 text-info mb-3 d-block"></i>
+        <h5 class="fw-bold">Top Products</h5>
+        <p class="text-secondary small">Discover the best-selling products by revenue</p>
+        <a href="{% url 'reporting:top_products' %}" class="btn btn-primary">
+          <i class="bi bi-arrow-right me-1"></i> View Report
+        </a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-body text-center py-4">
+        <i class="bi bi-graph-up-arrow fs-1 text-success mb-3 d-block"></i>
+        <h5 class="fw-bold">Sales Trends</h5>
+        <p class="text-secondary small">Monthly order volume and revenue trends</p>
+        <a href="{% url 'reporting:sales_trends' %}" class="btn btn-primary">
+          <i class="bi bi-arrow-right me-1"></i> View Report
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

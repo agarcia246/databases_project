@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — Northwind CRM{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div>
+    <h4 class="fw-bold mb-1">Dashboard</h4>
+    <p class="text-secondary mb-0 small">Overview of your Northwind business metrics</p>
+  </div>
+</div>
+
+{# ── KPI Row ── #}
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-3">
+    {% include "partials/_kpi_card.html" with title="Customers" value=total_customers icon="bi-people" color="primary" %}
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    {% include "partials/_kpi_card.html" with title="Orders" value=total_orders icon="bi-receipt" color="success" %}
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    {% include "partials/_kpi_card.html" with title="Revenue" value=total_revenue icon="bi-currency-dollar" color="warning" subtitle="Total order value" %}
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    {% include "partials/_kpi_card.html" with title="Products" value=total_products icon="bi-box" color="info" %}
+  </div>
+</div>
+
+{# ── Charts Row ── #}
+<div class="row g-3 mb-4">
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header d-flex align-items-center">
+        <i class="bi bi-graph-up me-2 text-primary"></i> Monthly Sales
+      </div>
+      <div class="card-body">
+        <div class="chart-wrapper">
+          <canvas id="monthlySalesChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card h-100">
+      <div class="card-header d-flex align-items-center">
+        <i class="bi bi-trophy me-2 text-warning"></i> Top Customers
+      </div>
+      <div class="card-body">
+        <div class="chart-wrapper">
+          <canvas id="topCustomersChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-lg-5">
+    <div class="card h-100">
+      <div class="card-header d-flex align-items-center">
+        <i class="bi bi-person-check me-2 text-success"></i> Employee Performance
+      </div>
+      <div class="card-body">
+        <div class="chart-wrapper">
+          <canvas id="employeeChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-7">
+    <div class="card h-100">
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <span><i class="bi bi-clock-history me-2 text-info"></i> Recent Orders</span>
+        <a href="{% url 'sales:order_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Customer</th>
+                <th>Employee</th>
+                <th>Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for order in recent_orders %}
+              <tr>
+                <td><a href="{% url 'sales:order_detail' order.pk %}">#{{ order.pk }}</a></td>
+                <td>{{ order.customer.company|default:"—" }}</td>
+                <td>{{ order.employee.first_name|default:"" }} {{ order.employee.last_name|default:"" }}</td>
+                <td>{{ order.order_date|date:"M d, Y"|default:"—" }}</td>
+                <td>
+                  {% if order.status %}
+                  <span class="badge badge-status bg-primary bg-opacity-10 text-primary">{{ order.status.status_name }}</span>
+                  {% else %}
+                  <span class="badge badge-status bg-secondary bg-opacity-10 text-secondary">N/A</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="5" class="text-center text-muted py-4">No orders found</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const monthlyLabels = [{% for m in monthly_sales %}"{{ m.month|date:'M Y' }}"{% if not forloop.last %},{% endif %}{% endfor %}];
+  const monthlyRevenue = [{% for m in monthly_sales %}{{ m.revenue|default:"0" }}{% if not forloop.last %},{% endif %}{% endfor %}];
+  createLineChart('monthlySalesChart', monthlyLabels, monthlyRevenue, 'Revenue ($)');
+
+  const custLabels = [{% for c in top_customers %}"{{ c.name|default:'Unknown' }}"{% if not forloop.last %},{% endif %}{% endfor %}];
+  const custData = [{% for c in top_customers %}{{ c.revenue|default:"0" }}{% if not forloop.last %},{% endif %}{% endfor %}];
+  createDoughnutChart('topCustomersChart', custLabels, custData);
+
+  const empLabels = [{% for e in employee_performance %}"{{ e.name|default:'Unknown' }}"{% if not forloop.last %},{% endif %}{% endfor %}];
+  const empData = [{% for e in employee_performance %}{{ e.order_count }}{% if not forloop.last %},{% endif %}{% endfor %}];
+  createHorizontalBarChart('employeeChart', empLabels, empData, 'Orders');
+</script>
+{% endblock %}

@@ -1,0 +1,13 @@
+{# Usage: {% include "partials/_kpi_card.html" with title="Customers" value=total_customers icon="bi-people" color="primary" %} #}
+<div class="card kpi-card border-{{ color|default:'primary' }} h-100">
+  <div class="card-body d-flex align-items-center justify-content-between py-3 px-4">
+    <div>
+      <div class="kpi-label">{{ title }}</div>
+      <div class="kpi-value">{{ value|default:"—" }}</div>
+      {% if subtitle %}<small class="text-muted">{{ subtitle }}</small>{% endif %}
+    </div>
+    <div class="kpi-icon text-{{ color|default:'primary' }}">
+      <i class="bi {{ icon }}"></i>
+    </div>
+  </div>
+</div>

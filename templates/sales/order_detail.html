@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+{% block title %}Order #{{ order.pk }} — Northwind CRM{% endblock %}
+
+{% block content %}
+<nav class="mb-3">
+  <ol class="breadcrumb small mb-0">
+    <li class="breadcrumb-item"><a href="{% url 'sales:order_list' %}">Orders</a></li>
+    <li class="breadcrumb-item active">Order #{{ order.pk }}</li>
+  </ol>
+</nav>
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div>
+    <h4 class="fw-bold mb-1">Order #{{ order.pk }}</h4>
+    <p class="text-secondary mb-0 small">
+      Placed {{ order.order_date|date:"F d, Y"|default:"N/A" }}
+      {% if order.status %} — <span class="badge badge-status bg-primary bg-opacity-10 text-primary">{{ order.status.status_name }}</span>{% endif %}
+    </p>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  {# ── Order Info ── #}
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-info-circle me-2"></i>Order Info</div>
+      <div class="card-body small">
+        <dl class="row mb-0">
+          <dt class="col-5 text-secondary">Customer</dt>
+          <dd class="col-7">
+            {% if order.customer %}
+            <a href="{% url 'crm:customer_detail' order.customer.pk %}">{{ order.customer.company|default:"—" }}</a>
+            {% else %}—{% endif %}
+          </dd>
+
+          <dt class="col-5 text-secondary">Employee</dt>
+          <dd class="col-7">
+            {% if order.employee %}
+            <a href="{% url 'crm:employee_detail' order.employee.pk %}">{{ order.employee.first_name }} {{ order.employee.last_name }}</a>
+            {% else %}—{% endif %}
+          </dd>
+
+          <dt class="col-5 text-secondary">Order Date</dt>
+          <dd class="col-7">{{ order.order_date|date:"M d, Y"|default:"—" }}</dd>
+
+          <dt class="col-5 text-secondary">Paid Date</dt>
+          <dd class="col-7">{{ order.paid_date|date:"M d, Y"|default:"—" }}</dd>
+
+          <dt class="col-5 text-secondary">Payment Type</dt>
+          <dd class="col-7">{{ order.payment_type|default:"—" }}</dd>
+
+          <dt class="col-5 text-secondary">Notes</dt>
+          <dd class="col-7">{{ order.notes|default:"—" }}</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+
+  {# ── Shipping Info ── #}
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-truck me-2"></i>Shipping</div>
+      <div class="card-body small">
+        <dl class="row mb-0">
+          <dt class="col-5 text-secondary">Ship Name</dt>
+          <dd class="col-7">{{ order.ship_name|default:"—" }}</dd>
+
+          <dt class="col-5 text-secondary">Address</dt>
+          <dd class="col-7">{{ order.ship_address|default:"—" }}</dd>
+
+          <dt class="col-5 text-secondary">City</dt>
+          <dd class="col-7">{{ order.ship_city|default:"—" }}, {{ order.ship_state_province|default:"" }}</dd>
+
+          <dt class="col-5 text-secondary">ZIP</dt>
+          <dd class="col-7">{{ order.ship_zip_postal_code|default:"—" }}</dd>
+
+          <dt class="col-5 text-secondary">Country</dt>
+          <dd class="col-7">{{ order.ship_country_region|default:"—" }}</dd>
+
+          <dt class="col-5 text-secondary">Shipper</dt>
+          <dd class="col-7">{{ order.shipper.company|default:"—" }}</dd>
+
+          <dt class="col-5 text-secondary">Shipped Date</dt>
+          <dd class="col-7">{{ order.shipped_date|date:"M d, Y"|default:"—" }}</dd>
+
+          <dt class="col-5 text-secondary">Shipping Fee</dt>
+          <dd class="col-7">${{ order.shipping_fee|floatformat:2|default:"0.00" }}</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+
+  {# ── Financials ── #}
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-currency-dollar me-2"></i>Financials</div>
+      <div class="card-body">
+        <dl class="row mb-0 small">
+          <dt class="col-6 text-secondary">Subtotal</dt>
+          <dd class="col-6 text-end fw-semibold">${{ subtotal|floatformat:2 }}</dd>
+
+          <dt class="col-6 text-secondary">Shipping</dt>
+          <dd class="col-6 text-end">${{ order.shipping_fee|floatformat:2|default:"0.00" }}</dd>
+
+          <dt class="col-6 text-secondary">Taxes</dt>
+          <dd class="col-6 text-end">${{ order.taxes|floatformat:2|default:"0.00" }}</dd>
+        </dl>
+        <hr>
+        <div class="d-flex justify-content-between fw-bold">
+          <span>Total</span>
+          <span class="text-primary fs-5">${{ subtotal|floatformat:2 }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# ── Line Items ── #}
+<div class="card mb-4">
+  <div class="card-header"><i class="bi bi-list-ul me-2"></i>Line Items</div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th class="text-end">Unit Price</th>
+            <th class="text-end">Qty</th>
+            <th class="text-end">Discount</th>
+            <th>Status</th>
+            <th class="text-end">Line Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in line_items %}
+          <tr>
+            <td>
+              {% if item.product %}
+              <a href="{% url 'catalog:product_detail' item.product.pk %}">{{ item.product.product_name }}</a>
+              {% else %}—{% endif %}
+            </td>
+            <td class="text-end">${{ item.unit_price|floatformat:2|default:"0.00" }}</td>
+            <td class="text-end">{{ item.quantity|floatformat:0 }}</td>
+            <td class="text-end">{{ item.discount|floatformat:2 }}%</td>
+            <td>
+              {% if item.status %}
+              <span class="badge badge-status bg-info bg-opacity-10 text-info">{{ item.status.status_name }}</span>
+              {% else %}—{% endif %}
+            </td>
+            <td class="text-end fw-semibold">${{ item.unit_price|default:0 }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6" class="text-center text-muted py-4">No line items</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{# ── Invoices ── #}
+{% if invoices %}
+<div class="card">
+  <div class="card-header"><i class="bi bi-file-earmark-text me-2"></i>Invoices</div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Invoice #</th>
+            <th>Invoice Date</th>
+            <th>Due Date</th>
+            <th class="text-end">Tax</th>
+            <th class="text-end">Shipping</th>
+            <th class="text-end">Amount Due</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for inv in invoices %}
+          <tr>
+            <td class="fw-semibold">#{{ inv.pk }}</td>
+            <td>{{ inv.invoice_date|date:"M d, Y"|default:"—" }}</td>
+            <td>{{ inv.due_date|date:"M d, Y"|default:"—" }}</td>
+            <td class="text-end">${{ inv.tax|floatformat:2|default:"0.00" }}</td>
+            <td class="text-end">${{ inv.shipping|floatformat:2|default:"0.00" }}</td>
+            <td class="text-end fw-bold">${{ inv.amount_due|floatformat:2|default:"0.00" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

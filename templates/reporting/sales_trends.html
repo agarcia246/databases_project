@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Sales Trends — Northwind CRM{% endblock %}
+
+{% block content %}
+<nav class="mb-3">
+  <ol class="breadcrumb small mb-0">
+    <li class="breadcrumb-item"><a href="{% url 'reporting:report_index' %}">Reports</a></li>
+    <li class="breadcrumb-item active">Sales Trends</li>
+  </ol>
+</nav>
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div>
+    <h4 class="fw-bold mb-1">Sales Trends</h4>
+    <p class="text-secondary mb-0 small">Monthly order volume and revenue over time</p>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-graph-up me-2 text-primary"></i>Monthly Revenue</div>
+      <div class="card-body">
+        <div class="chart-wrapper">
+          <canvas id="revenueChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-bar-chart me-2 text-success"></i>Monthly Order Count</div>
+      <div class="card-body">
+        <div class="chart-wrapper">
+          <canvas id="ordersChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="table-container">
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Month</th>
+          <th class="text-end">Orders</th>
+          <th class="text-end">Revenue</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in monthly %}
+        <tr>
+          <td class="fw-semibold">{{ m.month|date:"F Y" }}</td>
+          <td class="text-end">{{ m.order_count }}</td>
+          <td class="text-end">${{ m.revenue|floatformat:2|default:"0.00" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3" class="text-center text-muted py-4">No data available</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const labels = {{ chart_labels|safe }};
+  const revenueData = {{ chart_revenue|safe }};
+  const ordersData = {{ chart_orders|safe }};
+  createLineChart('revenueChart', labels, revenueData, 'Revenue ($)');
+  createBarChart('ordersChart', labels, ordersData, 'Orders');
+</script>
+{% endblock %}

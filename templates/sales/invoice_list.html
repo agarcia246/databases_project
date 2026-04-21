@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Invoices — Northwind CRM{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div>
+    <h4 class="fw-bold mb-1">Invoices</h4>
+    <p class="text-secondary mb-0 small">{{ total }} invoice{{ total|pluralize }} total</p>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <form method="get" class="row g-2 align-items-end">
+    <div class="col-md-8">
+      <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Search by invoice ID or customer…">
+    </div>
+    <div class="col-md-4">
+      <button type="submit" class="btn btn-primary"><i class="bi bi-search me-1"></i> Search</button>
+    </div>
+  </form>
+</div>
+
+<div class="table-container">
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Invoice #</th>
+          <th>Order #</th>
+          <th>Customer</th>
+          <th>Invoice Date</th>
+          <th>Due Date</th>
+          <th class="text-end">Tax</th>
+          <th class="text-end">Shipping</th>
+          <th class="text-end">Amount Due</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for inv in page_obj %}
+        <tr>
+          <td class="fw-semibold">#{{ inv.pk }}</td>
+          <td>
+            {% if inv.order %}
+            <a href="{% url 'sales:order_detail' inv.order.pk %}">#{{ inv.order.pk }}</a>
+            {% else %}—{% endif %}
+          </td>
+          <td>
+            {% if inv.order and inv.order.customer %}
+            <a href="{% url 'crm:customer_detail' inv.order.customer.pk %}">{{ inv.order.customer.company|default:"—" }}</a>
+            {% else %}—{% endif %}
+          </td>
+          <td>{{ inv.invoice_date|date:"M d, Y"|default:"—" }}</td>
+          <td>{{ inv.due_date|date:"M d, Y"|default:"—" }}</td>
+          <td class="text-end">${{ inv.tax|floatformat:2|default:"0.00" }}</td>
+          <td class="text-end">${{ inv.shipping|floatformat:2|default:"0.00" }}</td>
+          <td class="text-end fw-bold">${{ inv.amount_due|floatformat:2|default:"0.00" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8" class="text-center text-muted py-4">No invoices found</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% include "partials/_pagination.html" %}
+{% endblock %}

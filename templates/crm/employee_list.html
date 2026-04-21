@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Employees — Northwind CRM{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div>
+    <h4 class="fw-bold mb-1">Employees</h4>
+    <p class="text-secondary mb-0 small">{{ total }} employee{{ total|pluralize }} in the system</p>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <form method="get" class="row g-2 align-items-end">
+    <div class="col-md-8">
+      {{ form.q }}
+    </div>
+    <div class="col-md-4">
+      <button type="submit" class="btn btn-primary">
+        <i class="bi bi-search me-1"></i> Search
+      </button>
+    </div>
+  </form>
+</div>
+
+<div class="table-container">
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Job Title</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>City</th>
+          <th>Orders</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for emp in page_obj %}
+        <tr>
+          <td>{{ emp.pk }}</td>
+          <td class="fw-semibold">{{ emp.first_name|default:"" }} {{ emp.last_name|default:"" }}</td>
+          <td>{{ emp.job_title|default:"—" }}</td>
+          <td>{{ emp.email_address|default:"—" }}</td>
+          <td>{{ emp.business_phone|default:"—" }}</td>
+          <td>{{ emp.city|default:"—" }}</td>
+          <td><span class="badge bg-primary bg-opacity-10 text-primary">{{ emp.order_count }}</span></td>
+          <td>
+            <a href="{% url 'crm:employee_detail' emp.pk %}" class="btn btn-sm btn-outline-primary">
+              <i class="bi bi-eye"></i>
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8" class="text-center text-muted py-4">No employees found</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% include "partials/_pagination.html" %}
+{% endblock %}

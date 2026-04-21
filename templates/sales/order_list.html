@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Orders — Northwind CRM{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div>
+    <h4 class="fw-bold mb-1">Orders</h4>
+    <p class="text-secondary mb-0 small">{{ total }} order{{ total|pluralize }} total</p>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <form method="get" class="row g-2 align-items-end">
+    <div class="col-md-3">{{ form.q }}</div>
+    <div class="col-md-2">{{ form.status }}</div>
+    <div class="col-md-2">
+      <label class="form-label small text-secondary mb-1">From</label>
+      {{ form.date_from }}
+    </div>
+    <div class="col-md-2">
+      <label class="form-label small text-secondary mb-1">To</label>
+      {{ form.date_to }}
+    </div>
+    <div class="col-md-3">
+      <button type="submit" class="btn btn-primary me-1"><i class="bi bi-search me-1"></i> Search</button>
+      <a href="{% url 'sales:order_list' %}" class="btn btn-outline-secondary">Clear</a>
+    </div>
+  </form>
+</div>
+
+<div class="table-container">
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Order #</th>
+          <th>Customer</th>
+          <th>Employee</th>
+          <th>Order Date</th>
+          <th>Shipped</th>
+          <th>Ship City</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in page_obj %}
+        <tr>
+          <td><a href="{% url 'sales:order_detail' order.pk %}" class="fw-semibold">#{{ order.pk }}</a></td>
+          <td>
+            {% if order.customer %}
+            <a href="{% url 'crm:customer_detail' order.customer.pk %}">{{ order.customer.company|default:"—" }}</a>
+            {% else %}—{% endif %}
+          </td>
+          <td>{{ order.employee.first_name|default:"" }} {{ order.employee.last_name|default:"" }}</td>
+          <td>{{ order.order_date|date:"M d, Y"|default:"—" }}</td>
+          <td>{{ order.shipped_date|date:"M d, Y"|default:"—" }}</td>
+          <td>{{ order.ship_city|default:"—" }}</td>
+          <td>
+            {% if order.status %}
+            <span class="badge badge-status bg-primary bg-opacity-10 text-primary">{{ order.status.status_name }}</span>
+            {% else %}
+            <span class="badge badge-status bg-secondary bg-opacity-10 text-secondary">N/A</span>
+            {% endif %}
+          </td>
+          <td>
+            <a href="{% url 'sales:order_detail' order.pk %}" class="btn btn-sm btn-outline-primary">
+              <i class="bi bi-eye"></i>
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8" class="text-center text-muted py-4">No orders found</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% include "partials/_pagination.html" %}
+{% endblock %}

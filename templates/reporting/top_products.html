@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Top Products — Northwind CRM{% endblock %}
+
+{% block content %}
+<nav class="mb-3">
+  <ol class="breadcrumb small mb-0">
+    <li class="breadcrumb-item"><a href="{% url 'reporting:report_index' %}">Reports</a></li>
+    <li class="breadcrumb-item active">Top Products</li>
+  </ol>
+</nav>
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div>
+    <h4 class="fw-bold mb-1">Top Products by Revenue</h4>
+    <p class="text-secondary mb-0 small">Ranked by total revenue generated</p>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-lg-5">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-pie-chart me-2"></i>Revenue Share (Top 10)</div>
+      <div class="card-body">
+        <div class="chart-wrapper">
+          <canvas id="topProductsChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-7">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-bar-chart me-2"></i>Revenue Comparison (Top 10)</div>
+      <div class="card-body">
+        <div class="chart-wrapper">
+          <canvas id="topProductsBarChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="table-container">
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Product</th>
+          <th class="text-end">Qty Sold</th>
+          <th class="text-end">Total Revenue</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in products %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td class="fw-semibold">{{ p.product_name|default:"Unknown" }}</td>
+          <td class="text-end">{{ p.total_qty|floatformat:0 }}</td>
+          <td class="text-end fw-semibold">${{ p.total_revenue|floatformat:2|default:"0.00" }}</td>
+          <td>
+            {% if p.product_id %}
+            <a href="{% url 'catalog:product_detail' p.product_id %}" class="btn btn-sm btn-outline-primary">
+              <i class="bi bi-eye"></i>
+            </a>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="text-center text-muted py-4">No data available</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const labels = {{ chart_labels|safe }};
+  const data = {{ chart_data|safe }};
+  createDoughnutChart('topProductsChart', labels, data);
+  createHorizontalBarChart('topProductsBarChart', labels, data, 'Revenue ($)');
+</script>
+{% endblock %}

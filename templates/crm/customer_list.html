@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Customers — Northwind CRM{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div>
+    <h4 class="fw-bold mb-1">Customers</h4>
+    <p class="text-secondary mb-0 small">{{ total }} customer{{ total|pluralize }} in the system</p>
+  </div>
+</div>
+
+{# ── Search / Filter ── #}
+<div class="filter-bar">
+  <form method="get" class="row g-2 align-items-end">
+    <div class="col-md-4">
+      {{ form.q }}
+    </div>
+    <div class="col-md-3">
+      {{ form.city }}
+    </div>
+    <div class="col-md-3">
+      {{ form.country }}
+    </div>
+    <div class="col-md-2">
+      <button type="submit" class="btn btn-primary w-100">
+        <i class="bi bi-search me-1"></i> Search
+      </button>
+    </div>
+  </form>
+</div>
+
+{# ── Table ── #}
+<div class="table-container">
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Company</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>City</th>
+          <th>Country</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for customer in page_obj %}
+        <tr>
+          <td>{{ customer.pk }}</td>
+          <td class="fw-semibold">{{ customer.first_name|default:"" }} {{ customer.last_name|default:"" }}</td>
+          <td>{{ customer.company|default:"—" }}</td>
+          <td><a href="mailto:{{ customer.email_address }}">{{ customer.email_address|default:"—" }}</a></td>
+          <td>{{ customer.business_phone|default:"—" }}</td>
+          <td>{{ customer.city|default:"—" }}</td>
+          <td>{{ customer.country_region|default:"—" }}</td>
+          <td>
+            <a href="{% url 'crm:customer_detail' customer.pk %}" class="btn btn-sm btn-outline-primary">
+              <i class="bi bi-eye"></i>
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8" class="text-center text-muted py-4">No customers found</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% include "partials/_pagination.html" %}
+{% endblock %}
