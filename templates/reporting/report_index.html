@@ -17,7 +17,7 @@
     {% include "partials/_kpi_card.html" with title="Orders" value=total_orders icon="bi-receipt" color="success" %}
   </div>
   <div class="col-sm-6 col-xl-3">
-    {% include "partials/_kpi_card.html" with title="Revenue" value=total_revenue icon="bi-currency-dollar" color="warning" %}
+    {% include "partials/_kpi_card.html" with title="Revenue" value=total_revenue|floatformat:2 icon="bi-currency-dollar" color="warning" %}
   </div>
   <div class="col-sm-6 col-xl-3">
     {% include "partials/_kpi_card.html" with title="Products" value=total_products icon="bi-box" color="info" %}

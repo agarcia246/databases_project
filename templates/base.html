@@ -15,7 +15,8 @@
 
   {# ── Top navbar ── #}
   <nav class="top-navbar navbar navbar-expand-lg fixed-top px-3">
-    <button class="btn btn-sm d-lg-none me-2" id="sidebarToggle" type="button">
+    <button class="btn btn-sm d-lg-none me-2" id="sidebarToggle" type="button"
+            aria-label="Open navigation" aria-controls="sidebar" aria-expanded="false">
       <i class="bi bi-list fs-5"></i>
     </button>
     <a class="navbar-brand" href="{% url 'dashboard' %}">
@@ -93,7 +94,9 @@
   <script src="{% static 'js/charts.js' %}"></script>
   <script>
     document.getElementById('sidebarToggle')?.addEventListener('click', function() {
-      document.getElementById('sidebar').classList.toggle('show');
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('show');
+      this.setAttribute('aria-expanded', sidebar.classList.contains('show') ? 'true' : 'false');
     });
   </script>
   {% block extra_js %}{% endblock %}

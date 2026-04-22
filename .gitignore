@@ -1,6 +1,6 @@
 .env
 .env.postgres
-.venv/
+.venv*/
 __pycache__/
 *.pyc
 staticfiles/
