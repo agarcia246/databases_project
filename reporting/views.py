@@ -76,7 +76,7 @@ def sales_trends(request):
         .annotate(month=TruncMonth('order_date'))
         .values('month')
         .annotate(
-            order_count=Count('id'),
+            order_count=Count('id', distinct=True),
             revenue=Sum(F('orderdetails__unit_price') * F('orderdetails__quantity')),
         )
         .order_by('month')

@@ -58,10 +58,16 @@ def order_detail(request, pk):
         .filter(order=order)
         .select_related('product', 'status')
     )
+    for item in line_items:
+        unit_price = item.unit_price or 0
+        quantity = item.quantity or 0
+        item.line_total = unit_price * quantity
 
     subtotal = line_items.aggregate(
         total=Sum(F('unit_price') * F('quantity'))
     )['total'] or 0
+    shipping = order.shipping_fee or 0
+    taxes = order.taxes or 0
 
     invoices = Invoices.objects.filter(order=order)
 
@@ -70,6 +76,7 @@ def order_detail(request, pk):
         'order': order,
         'line_items': line_items,
         'subtotal': subtotal,
+        'total': subtotal + shipping + taxes,
         'invoices': invoices,
     })
 

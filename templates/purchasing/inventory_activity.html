@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Inventory Activity — Northwind CRM{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div>
+    <h4 class="fw-bold mb-1">Inventory Activity</h4>
+    <p class="text-secondary mb-0 small">{{ total }} inventory transaction{{ total|pluralize }} recorded</p>
+  </div>
+  <a href="{% url 'purchasing:index' %}" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left me-1"></i> Overview
+  </a>
+</div>
+
+<div class="filter-bar">
+  <form method="get" class="row g-2 align-items-end">
+    <div class="col-md-6">
+      <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Search product, notes, sales order, or purchase order">
+    </div>
+    <div class="col-md-3">
+      <select name="type" class="form-select">
+        <option value="">All transaction types</option>
+        {% for txn_type in transaction_types %}
+        <option value="{{ txn_type.pk }}" {% if transaction_type_id == txn_type.pk|stringformat:"s" %}selected{% endif %}>
+          {{ txn_type.type_name }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-3">
+      <button type="submit" class="btn btn-primary me-1">
+        <i class="bi bi-search me-1"></i> Search
+      </button>
+      <a href="{% url 'purchasing:inventory_activity' %}" class="btn btn-outline-secondary">Clear</a>
+    </div>
+  </form>
+</div>
+
+<div class="table-container">
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Type</th>
+          <th>Product</th>
+          <th class="text-end">Qty</th>
+          <th>Purchase Order</th>
+          <th>Sales Order</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for transaction in page_obj %}
+        <tr>
+          <td>{{ transaction.transaction_created_date|date:"M d, Y"|default:"—" }}</td>
+          <td>{{ transaction.transaction_type.type_name|default:"—" }}</td>
+          <td>{{ transaction.product.product_name|default:"—" }}</td>
+          <td class="text-end">{{ transaction.quantity }}</td>
+          <td>
+            {% if transaction.purchase_order %}
+            <a href="{% url 'purchasing:purchase_order_detail' transaction.purchase_order.pk %}">#{{ transaction.purchase_order.pk }}</a>
+            {% else %}
+            —
+            {% endif %}
+          </td>
+          <td>
+            {% if transaction.customer_order %}
+            <a href="{% url 'sales:order_detail' transaction.customer_order.pk %}">#{{ transaction.customer_order.pk }}</a>
+            {% else %}
+            —
+            {% endif %}
+          </td>
+          <td>{{ transaction.comments|default:"—" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" class="text-center text-muted py-4">No inventory transactions found</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% include "partials/_pagination.html" %}
+{% endblock %}

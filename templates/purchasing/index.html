@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}Purchasing — Northwind CRM{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div>
+    <h4 class="fw-bold mb-1">Purchasing</h4>
+    <p class="text-secondary mb-0 small">Procurement and inventory operations at a glance</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'purchasing:purchase_order_list' %}" class="btn btn-outline-primary">
+      <i class="bi bi-receipt me-1"></i> Purchase Orders
+    </a>
+    <a href="{% url 'purchasing:inventory_activity' %}" class="btn btn-primary">
+      <i class="bi bi-box-seam me-1"></i> Inventory Activity
+    </a>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-3">
+    {% include "partials/_kpi_card.html" with title="Purchase Orders" value=total_purchase_orders icon="bi-receipt" color="primary" %}
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    {% include "partials/_kpi_card.html" with title="Inventory Events" value=total_inventory_events icon="bi-arrow-left-right" color="info" %}
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    {% include "partials/_kpi_card.html" with title="Open Lines" value=outstanding_lines icon="bi-hourglass-split" color="warning" subtitle="Pending receipt" %}
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    {% include "partials/_kpi_card.html" with title="Received Lines" value=received_lines icon="bi-check2-circle" color="success" %}
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card h-100">
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <span><i class="bi bi-clock-history me-2 text-primary"></i>Recent Purchase Orders</span>
+        <a href="{% url 'purchasing:purchase_order_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead>
+              <tr>
+                <th>PO #</th>
+                <th>Supplier</th>
+                <th>Created</th>
+                <th>Expected</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for order in recent_purchase_orders %}
+              <tr>
+                <td><a href="{% url 'purchasing:purchase_order_detail' order.pk %}" class="fw-semibold">#{{ order.pk }}</a></td>
+                <td>{{ order.supplier.company|default:"—" }}</td>
+                <td>{{ order.creation_date|date:"M d, Y"|default:"—" }}</td>
+                <td>{{ order.expected_date|date:"M d, Y"|default:"—" }}</td>
+                <td>
+                  {% if order.status %}
+                  <span class="badge badge-status bg-primary bg-opacity-10 text-primary">{{ order.status.status|default:"N/A" }}</span>
+                  {% else %}
+                  <span class="badge badge-status bg-secondary bg-opacity-10 text-secondary">N/A</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="5" class="text-center text-muted py-4">No purchase orders found</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card h-100">
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <span><i class="bi bi-boxes me-2 text-info"></i>Recent Inventory Activity</span>
+        <a href="{% url 'purchasing:inventory_activity' %}" class="btn btn-sm btn-outline-primary">View All</a>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Product</th>
+                <th>Type</th>
+                <th class="text-end">Qty</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for transaction in recent_inventory %}
+              <tr>
+                <td>{{ transaction.transaction_created_date|date:"M d, Y"|default:"—" }}</td>
+                <td>{{ transaction.product.product_name|default:"—" }}</td>
+                <td>{{ transaction.transaction_type.type_name|default:"—" }}</td>
+                <td class="text-end">{{ transaction.quantity }}</td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="4" class="text-center text-muted py-4">No inventory activity found</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

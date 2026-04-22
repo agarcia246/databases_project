@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Purchase Orders — Northwind CRM{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div>
+    <h4 class="fw-bold mb-1">Purchase Orders</h4>
+    <p class="text-secondary mb-0 small">{{ total }} purchase order{{ total|pluralize }} tracked</p>
+  </div>
+  <a href="{% url 'purchasing:index' %}" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left me-1"></i> Overview
+  </a>
+</div>
+
+<div class="filter-bar">
+  <form method="get" class="row g-2 align-items-end">
+    <div class="col-md-4">
+      <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Search PO, supplier, notes, or payment method">
+    </div>
+    <div class="col-md-3">
+      <select name="status" class="form-select">
+        <option value="">All statuses</option>
+        {% for status in status_choices %}
+        <option value="{{ status.pk }}" {% if status_id == status.pk|stringformat:"s" %}selected{% endif %}>
+          {{ status.status|default:"Unnamed status" }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-3">
+      <select name="supplier" class="form-select">
+        <option value="">All suppliers</option>
+        {% for supplier_pk, supplier_name in supplier_choices %}
+        <option value="{{ supplier_pk }}" {% if supplier_id == supplier_pk|stringformat:"s" %}selected{% endif %}>
+          {{ supplier_name|default:"Unknown supplier" }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <button type="submit" class="btn btn-primary me-1">
+        <i class="bi bi-search me-1"></i> Search
+      </button>
+      <a href="{% url 'purchasing:purchase_order_list' %}" class="btn btn-outline-secondary">Clear</a>
+    </div>
+  </form>
+</div>
+
+<div class="table-container">
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>PO #</th>
+          <th>Supplier</th>
+          <th>Created By</th>
+          <th>Created</th>
+          <th>Expected</th>
+          <th>Status</th>
+          <th class="text-end">Shipping</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in page_obj %}
+        <tr>
+          <td><a href="{% url 'purchasing:purchase_order_detail' order.pk %}" class="fw-semibold">#{{ order.pk }}</a></td>
+          <td>{{ order.supplier.company|default:"—" }}</td>
+          <td>{{ order.created_by.first_name|default:"" }} {{ order.created_by.last_name|default:"" }}</td>
+          <td>{{ order.creation_date|date:"M d, Y"|default:"—" }}</td>
+          <td>{{ order.expected_date|date:"M d, Y"|default:"—" }}</td>
+          <td>
+            {% if order.status %}
+            <span class="badge badge-status bg-primary bg-opacity-10 text-primary">{{ order.status.status|default:"N/A" }}</span>
+            {% else %}
+            <span class="badge badge-status bg-secondary bg-opacity-10 text-secondary">N/A</span>
+            {% endif %}
+          </td>
+          <td class="text-end">${{ order.shipping_fee|floatformat:2|default:"0.00" }}</td>
+          <td>
+            <a href="{% url 'purchasing:purchase_order_detail' order.pk %}" class="btn btn-sm btn-outline-primary">
+              <i class="bi bi-eye"></i>
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8" class="text-center text-muted py-4">No purchase orders found</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% include "partials/_pagination.html" %}
+{% endblock %}

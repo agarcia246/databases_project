@@ -37,7 +37,10 @@ def dashboard(request):
         .filter(order_date__isnull=False)
         .annotate(month=TruncMonth('order_date'))
         .values('month')
-        .annotate(count=Count('id'), revenue=Sum(F('orderdetails__unit_price') * F('orderdetails__quantity')))
+        .annotate(
+            count=Count('id', distinct=True),
+            revenue=Sum(F('orderdetails__unit_price') * F('orderdetails__quantity')),
+        )
         .order_by('month')
     )
 

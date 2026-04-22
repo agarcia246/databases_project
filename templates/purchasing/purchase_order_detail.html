@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% block title %}Purchase Order #{{ purchase_order.pk }} — Northwind CRM{% endblock %}
+
+{% block content %}
+<nav class="mb-3">
+  <ol class="breadcrumb small mb-0">
+    <li class="breadcrumb-item"><a href="{% url 'purchasing:index' %}">Purchasing</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'purchasing:purchase_order_list' %}">Purchase Orders</a></li>
+    <li class="breadcrumb-item active">PO #{{ purchase_order.pk }}</li>
+  </ol>
+</nav>
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div>
+    <h4 class="fw-bold mb-1">Purchase Order #{{ purchase_order.pk }}</h4>
+    <p class="text-secondary mb-0 small">
+      Created {{ purchase_order.creation_date|date:"F d, Y"|default:"N/A" }}
+      {% if purchase_order.status %}
+      — <span class="badge badge-status bg-primary bg-opacity-10 text-primary">{{ purchase_order.status.status|default:"N/A" }}</span>
+      {% endif %}
+    </p>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-truck me-2"></i>Supplier</div>
+      <div class="card-body small">
+        <dl class="row mb-0">
+          <dt class="col-5 text-secondary">Company</dt>
+          <dd class="col-7">{{ purchase_order.supplier.company|default:"—" }}</dd>
+
+          <dt class="col-5 text-secondary">Contact</dt>
+          <dd class="col-7">{{ purchase_order.supplier.first_name|default:"" }} {{ purchase_order.supplier.last_name|default:"" }}</dd>
+
+          <dt class="col-5 text-secondary">Phone</dt>
+          <dd class="col-7">{{ purchase_order.supplier.business_phone|default:"—" }}</dd>
+
+          <dt class="col-5 text-secondary">Email</dt>
+          <dd class="col-7">{{ purchase_order.supplier.email_address|default:"—" }}</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-calendar-event me-2"></i>Order Timeline</div>
+      <div class="card-body small">
+        <dl class="row mb-0">
+          <dt class="col-6 text-secondary">Created</dt>
+          <dd class="col-6">{{ purchase_order.creation_date|date:"M d, Y"|default:"—" }}</dd>
+
+          <dt class="col-6 text-secondary">Submitted</dt>
+          <dd class="col-6">{{ purchase_order.submitted_date|date:"M d, Y"|default:"—" }}</dd>
+
+          <dt class="col-6 text-secondary">Expected</dt>
+          <dd class="col-6">{{ purchase_order.expected_date|date:"M d, Y"|default:"—" }}</dd>
+
+          <dt class="col-6 text-secondary">Approved</dt>
+          <dd class="col-6">{{ purchase_order.approved_date|date:"M d, Y"|default:"—" }}</dd>
+
+          <dt class="col-6 text-secondary">Paid</dt>
+          <dd class="col-6">{{ purchase_order.payment_date|date:"M d, Y"|default:"—" }}</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-currency-dollar me-2"></i>Financial Summary</div>
+      <div class="card-body">
+        <dl class="row mb-0 small">
+          <dt class="col-7 text-secondary">Line Items</dt>
+          <dd class="col-5 text-end">{{ total_lines }}</dd>
+
+          <dt class="col-7 text-secondary">Units Ordered</dt>
+          <dd class="col-5 text-end">{{ total_quantity|floatformat:0 }}</dd>
+
+          <dt class="col-7 text-secondary">Lines Received</dt>
+          <dd class="col-5 text-end">{{ received_lines }}</dd>
+
+          <dt class="col-7 text-secondary">Subtotal</dt>
+          <dd class="col-5 text-end">${{ subtotal|floatformat:2 }}</dd>
+
+          <dt class="col-7 text-secondary">Shipping</dt>
+          <dd class="col-5 text-end">${{ purchase_order.shipping_fee|floatformat:2|default:"0.00" }}</dd>
+
+          <dt class="col-7 text-secondary">Taxes</dt>
+          <dd class="col-5 text-end">${{ purchase_order.taxes|floatformat:2|default:"0.00" }}</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-header"><i class="bi bi-list-ul me-2"></i>Line Items</div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th class="text-end">Quantity</th>
+            <th class="text-end">Unit Cost</th>
+            <th>Received</th>
+            <th>Inventory Link</th>
+            <th class="text-end">Line Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in line_items %}
+          <tr>
+            <td>{{ item.product.product_name|default:"—" }}</td>
+            <td class="text-end">{{ item.quantity|floatformat:0 }}</td>
+            <td class="text-end">${{ item.unit_cost|floatformat:2 }}</td>
+            <td>{{ item.date_received|date:"M d, Y"|default:"Pending" }}</td>
+            <td>
+              {% if item.inventory %}
+              Txn #{{ item.inventory.pk }}
+              {% else %}
+              —
+              {% endif %}
+            </td>
+            <td class="text-end fw-semibold">${{ item.line_total|floatformat:2 }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6" class="text-center text-muted py-4">No line items found</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><i class="bi bi-boxes me-2"></i>Related Inventory Transactions</div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Product</th>
+            <th class="text-end">Qty</th>
+            <th>Sales Order</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for transaction in related_inventory %}
+          <tr>
+            <td>{{ transaction.transaction_created_date|date:"M d, Y"|default:"—" }}</td>
+            <td>{{ transaction.transaction_type.type_name|default:"—" }}</td>
+            <td>{{ transaction.product.product_name|default:"—" }}</td>
+            <td class="text-end">{{ transaction.quantity }}</td>
+            <td>
+              {% if transaction.customer_order %}
+              <a href="{% url 'sales:order_detail' transaction.customer_order.pk %}">#{{ transaction.customer_order.pk }}</a>
+              {% else %}
+              —
+              {% endif %}
+            </td>
+            <td>{{ transaction.comments|default:"—" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6" class="text-center text-muted py-4">No inventory transactions linked to this purchase order</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

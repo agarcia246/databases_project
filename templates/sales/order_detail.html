@@ -108,7 +108,7 @@
         <hr>
         <div class="d-flex justify-content-between fw-bold">
           <span>Total</span>
-          <span class="text-primary fs-5">${{ subtotal|floatformat:2 }}</span>
+          <span class="text-primary fs-5">${{ total|floatformat:2 }}</span>
         </div>
       </div>
     </div>
@@ -147,7 +147,7 @@
               <span class="badge badge-status bg-info bg-opacity-10 text-info">{{ item.status.status_name }}</span>
               {% else %}—{% endif %}
             </td>
-            <td class="text-end fw-semibold">${{ item.unit_price|default:0 }}</td>
+            <td class="text-end fw-semibold">${{ item.line_total|floatformat:2 }}</td>
           </tr>
           {% empty %}
           <tr><td colspan="6" class="text-center text-muted py-4">No line items</td></tr>

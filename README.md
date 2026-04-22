@@ -1,9 +1,10 @@
-# Northwind Django Dashboard
+# Northwind Django Platform
 
 A Django 6 application that turns the classic **Northwind** sample database
-into a modern management dashboard with CRM, sales, catalog, purchasing and
-reporting modules — plus a **semantic product search** powered by sentence
-embeddings stored in Postgres via the `pgvector` extension.
+into a modern multi-surface platform: an internal management dashboard with
+CRM, sales, catalog, purchasing and reporting modules, plus a customer-facing
+storefront with cart, checkout, account pages, and **semantic product search**
+powered by sentence embeddings stored in Postgres via the `pgvector` extension.
 
 **Two databases, one Django project:**
 
@@ -14,21 +15,24 @@ embeddings stored in Postgres via the `pgvector` extension.
   every product, used for natural-language search and "similar products"
   recommendations. Routed through a custom `DATABASE_ROUTERS` entry.
 
-![Northwind ERD](mywind/northwind-erd.png)
+The Northwind schema is loaded from the SQL files in `mywind/` and mapped into
+Django with `managed = False` models.
 
 ---
 
 ## Features
 
-| Area           | What it does                                                             |
-|----------------|--------------------------------------------------------------------------|
-| **Dashboard**  | KPI tiles and revenue/orders charts over the whole data set              |
-| **CRM**        | Customers, employees, suppliers — list + detail pages                    |
-| **Sales**      | Orders, order details, invoices; breakdowns on each                      |
-| **Catalog**    | Products with stats, recent orders, and semantic "similar products"      |
-| **Reporting**  | Top customers, top products, sales trends (Chart.js)                     |
-| **Semantic search** | Free-text queries like *"cold refreshing drink"* → ranked products  |
-| **Admin**      | Full Django admin at `/admin/` (requires a superuser)                    |
+| Area | What it does |
+|------|---------------|
+| **Dashboard** | KPI tiles and revenue/order charts over the whole data set |
+| **CRM** | Customers, employees, suppliers — list and detail pages |
+| **Sales** | Orders, order details, invoices, and back-office order drill-downs |
+| **Purchasing** | Purchase-order overview, filtering, detail views, and inventory activity |
+| **Catalog** | Products with stats, recent orders, and semantic "similar products" |
+| **Reporting** | Top customers, top products, sales trends (Chart.js) |
+| **Storefront** | Public product browsing, category discovery, semantic search, cart, checkout, account, and order history |
+| **Semantic search** | Free-text queries like *"cold refreshing drink"* → ranked products |
+| **Admin** | Full Django admin at `/admin/` (requires a superuser) |
 
 ---
 
@@ -46,14 +50,15 @@ embeddings stored in Postgres via the `pgvector` extension.
 
 ```bash
 git clone <your-repo-url>
-cd northwind
+cd databases_project
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-`requirements.txt` pins the minimum versions of Django, mysqlclient,
-python-dotenv, psycopg, pgvector, and sentence-transformers.
+`requirements.txt` installs the Django app, MySQL/Postgres drivers, and the
+ML/vector-search stack (`sentence-transformers`, `torch`, `transformers`,
+`pgvector`, etc.) used by the semantic search features.
 
 ---
 
@@ -82,6 +87,9 @@ VDB_PASSWORD=northwind
 VDB_HOST=127.0.0.1
 VDB_PORT=5432
 ```
+
+These values are read by `config/settings.py`, so you can keep the repo clean
+and switch environments without editing committed code.
 
 And `.env.postgres` — read by `docker-compose.yml` to seed the Postgres
 container:
@@ -150,6 +158,9 @@ This spins up `pgvector/pgvector:pg16` on port 5432, with credentials from
 `.env.postgres`. Data persists in the `pgvector_data` named volume across
 restarts.
 
+If port 5432 is already in use on your machine, either stop the conflicting
+local Postgres instance or remap the host port in `docker-compose.yml`.
+
 Check it's up:
 
 ```bash
@@ -193,34 +204,43 @@ Open <http://127.0.0.1:8000>. Suggested things to try:
 - `/search/?q=cold refreshing drink`
 - Click any product — the detail page shows a **Similar Products** panel
   built from the same vector index.
+- Visit `/shop/` and try the customer-facing storefront flow.
+- Visit `/purchasing/` to review procurement and inventory operations.
 
 ---
 
 ## Available routes
 
-| URL                         | Description                                   |
-|-----------------------------|-----------------------------------------------|
-| `/`                         | Dashboard with KPIs and charts                |
-| `/crm/customers/`           | Customer list                                 |
-| `/crm/employees/`           | Employee list                                 |
-| `/crm/suppliers/`           | Supplier list                                 |
-| `/sales/orders/`            | Order list                                    |
-| `/sales/invoices/`          | Invoice list                                  |
-| `/catalog/products/`        | Product list (keyword filter)                 |
-| `/catalog/products/<id>/`   | Product detail with "Similar Products"        |
-| `/search/`                  | Semantic product search                       |
-| `/reports/`                 | Reports landing page                          |
-| `/reports/top-customers/`   | Top customers by revenue                      |
-| `/reports/top-products/`    | Top products by revenue                       |
-| `/reports/sales-trends/`    | Monthly sales trends                          |
-| `/admin/`                   | Django admin                                  |
+| URL | Description |
+|-----|-------------|
+| `/` | Dashboard with KPIs and charts |
+| `/crm/customers/` | Customer list |
+| `/crm/employees/` | Employee list |
+| `/crm/suppliers/` | Supplier list |
+| `/sales/orders/` | Order list |
+| `/sales/invoices/` | Invoice list |
+| `/purchasing/` | Purchasing overview |
+| `/purchasing/orders/` | Purchase-order list |
+| `/purchasing/inventory/` | Inventory transaction activity |
+| `/catalog/products/` | Product list (keyword filter) |
+| `/catalog/products/<id>/` | Product detail with "Similar Products" |
+| `/search/` | Semantic product search |
+| `/reports/` | Reports landing page |
+| `/reports/top-customers/` | Top customers by revenue |
+| `/reports/top-products/` | Top products by revenue |
+| `/reports/sales-trends/` | Monthly sales trends |
+| `/shop/` | Customer storefront home |
+| `/shop/cart/` | Session cart |
+| `/shop/checkout/` | Authenticated checkout |
+| `/shop/orders/` | Customer order history |
+| `/admin/` | Django admin |
 
 ---
 
 ## Project structure
 
 ```
-northwind/
+databases_project/
 ├── config/                  # Django project (settings, urls, routers)
 │   ├── settings.py
 │   ├── urls.py
@@ -229,7 +249,7 @@ northwind/
 ├── crm/                     # Customers, employees, suppliers
 ├── catalog/                 # Products (incl. similar-products panel)
 ├── sales/                   # Orders, order details, invoices
-├── purchasing/              # Purchase orders, inventory
+├── purchasing/              # Purchase orders and inventory operations
 ├── reporting/               # Charts & aggregate reports
 ├── search/                  # Semantic search app (pgvector)
 │   ├── models.py            # ProductEmbedding (vector(384), HNSW index)
@@ -237,9 +257,10 @@ northwind/
 │   ├── services.py          # semantic_search / similar_products
 │   ├── views.py, urls.py
 │   └── management/commands/embed_products.py
+├── shop/                    # Customer-facing storefront and checkout flow
 ├── templates/               # Shared Bootstrap templates
 ├── static/                  # CSS & JS
-├── mywind/                  # Northwind SQL scripts + ERD images
+├── mywind/                  # Northwind SQL scripts
 ├── docker-compose.yml       # pgvector service
 ├── requirements.txt
 ├── manage.py
@@ -272,6 +293,15 @@ and `EMBEDDING_DIM` in `search/embeddings.py` and rerunning
 `Products` would make this real-time — the incremental content-hash check
 already makes single-row re-embedding free.
 
+**Storefront flow.** The `shop` app gives the project a second surface beyond
+the internal dashboard: users can register, get linked to a Northwind
+`customers` row, browse products, use semantic search, build a session cart,
+place an order, and review their own order history.
+
+**Purchasing visibility.** The `purchasing` app now exposes read-oriented
+operations for procurement teams: purchase-order monitoring, line-item review,
+and inventory transaction tracing.
+
 ---
 
 ## Troubleshooting
@@ -283,6 +313,7 @@ already makes single-row re-embedding free.
 | `'django.contrib.postgres' must be in INSTALLED_APPS`                   | Required by `HnswIndex` system checks — it's already listed; confirm settings weren't reverted. |
 | `PermissionError` downloading from Hugging Face                          | Set `HF_HOME="$(pwd)/.cache/hf"` before running `embed_products`.                        |
 | `connection refused` on port 5432                                        | `docker compose up -d pgvector` and wait ~5s for it to boot.                             |
+| `Bind for 0.0.0.0:5432 failed: port is already allocated`                | Another Postgres is already using 5432. Stop it or remap the Docker host port.           |
 | Search returns nothing                                                  | Index empty — run `python manage.py embed_products`.                                     |
 
 ---
@@ -308,3 +339,20 @@ LIMIT 5;"
 # Reset pgvector volume (deletes all embeddings)
 docker compose down -v
 ```
+
+## Suggested presentation flow
+
+For a final demo, a strong sequence is:
+
+1. Start on `/` to show the dashboard, KPIs, and trend charts.
+2. Open `/reports/sales-trends/` and explain how the app aggregates the shared
+   Northwind order data.
+3. Open `/catalog/products/<id>/` or `/search/` to introduce semantic search
+   and the second Postgres database.
+4. Switch to `/shop/` to demonstrate the customer-facing flow:
+   browse, semantic search, cart, checkout, and order history.
+5. Finish on `/purchasing/` to show that the project also supports internal
+   procurement and inventory operations, not just sales.
+
+That sequence tells a coherent story: one imported relational dataset, multiple
+user roles, two databases, analytics, and a practical end-to-end workflow.
